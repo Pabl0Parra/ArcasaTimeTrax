@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "timetrax",
-    "slug": "timetrax",
+    "slug": "timetrax2",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -25,6 +25,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a75477ba-ddac-4559-b68c-10796a8c28cd"
+      }
+    },
+    "owner": "pabl0parra"
   }
 }
