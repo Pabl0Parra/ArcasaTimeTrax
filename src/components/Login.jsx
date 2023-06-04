@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image, Alert, ImageBackground } from 'react-native';
+import loginBg from '../assets/loginBg.jpg';
 
 
 export default function Login({ navigation }) {
@@ -75,31 +76,51 @@ export default function Login({ navigation }) {
     }
 
     return (
-        <SafeAreaView>
-            <View style={styles.container}>
-                <Text>
-                    {isBiometricAvailable
-                        ? 'Biometric is available on this device'
-                        : 'Biometric is not available on this device'}
-                </Text>
-                <TouchableOpacity style={styles.button} onPress={handleBiometricAuth}>
-                    <Text style={styles.buttonText}>Log in with biometrics</Text>
-                </TouchableOpacity>
-            </View>
-        </SafeAreaView>
+        <View style={styles.container}>
+            <ImageBackground source={loginBg} style={styles.backgroundImage}>
+                <View style={styles.content}>
+                    <Text style={styles.text}>
+                        {isBiometricAvailable ? 'Biometric is available on this device' : 'Biometric is not available on this device'}
+                    </Text>
+                    <TouchableOpacity style={styles.button} onPress={handleBiometricAuth}>
+                        <Text style={styles.buttonText}>Log in with biometrics</Text>
+                    </TouchableOpacity>
+                </View>
+            </ImageBackground>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: 'transparent',
+        width: '100%',
+    },
+    backgroundImage: {
+        flex: 1,
+        resizeMode: 'cover',
+        justifyContent: 'center',
+        width: '100%',
+        marginLeft: 0,
+    },
+    content: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.1)', // Adjust the opacity as desired
         alignItems: 'center',
         justifyContent: 'space-around',
+        gap: 100,
+        marginTop: -100,
         padding: 20,
     },
+    text: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
     button: {
-        backgroundColor: '#2196F3',
+        backgroundColor: '#eb6909',
         padding: 10,
         borderRadius: 5,
     },
@@ -107,9 +128,9 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: 'bold',
-
     },
 });
+
 
 
 
