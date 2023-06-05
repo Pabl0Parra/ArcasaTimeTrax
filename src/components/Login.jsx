@@ -31,13 +31,18 @@ export default function Login({ navigation }) {
     }
 
     const TwoButtonAlert = () => {
-        Alert.alert("Welcome to the app", "Subscribe now", [
+        Alert.alert("Bienvenido a Arcasa", "Comienza tu jornada", [
             {
-                text: "Cancel",
+                text: "Cancela",
                 onPress: () => console.log("Cancel Pressed"),
                 style: "cancel"
             },
-            { text: "Subscribe", onPress: () => console.log("Subscribe Pressed") }
+            {
+                text: "Entra", onPress: () => {
+                    navigation.navigate('Clockin')
+                    console.log("Subscribe Pressed")
+                }
+            }
         ])
     }
 
@@ -68,7 +73,7 @@ export default function Login({ navigation }) {
             disabledDeviceFallback: true,
         });
         // log the user in on successful authentication
-        if (biometricAuth) { TwoButtonAlert() }
+        if (biometricAuth) { TwoButtonAlert(navigation) }
         console.log({ isBiometricAvailable })
         console.log({ supportedBiometrics });
         console.log({ savedBiometrics });
@@ -106,7 +111,7 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.1)', // Adjust the opacity as desired
+        backgroundColor: 'rgba(0, 0, 0, 0.1)',
         alignItems: 'center',
         justifyContent: 'space-around',
         gap: 100,
