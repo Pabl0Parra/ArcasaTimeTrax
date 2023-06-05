@@ -1,134 +1,104 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, Button } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { Biometrics } from 'react-native-biometrics';
 
-const toRadians = (degrees) => {
-    return (degrees * Math.PI) / 180;
-};
+const ClockInScreen = () => {
+    const [position, setPosition] = useState(null);
+    const [isWithinRange, setIsWithinRange] = useState(false);
 
-const haversineDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3; // Earth's radius in meters
-    const φ1 = toRadians(lat1);
-    const φ2 = toRadians(lat2);
-    const Δφ = toRadians(lat2 - lat1);
-    const Δλ = toRadians(lon2 - lon1);
+    const workLocation = {
+        latitude: 41.4314327,
+        longitude: 2.2184554,
+    };
 
-    const a =
-        Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    const d = R * c;
-    return d;
-};
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    message: {
-        fontSize: 18,
-        marginBottom: 10,
-    },
-    button: {
-        backgroundColor: '#2196F3',
-        padding: 10,
-        borderRadius: 5,
-    },
-    buttonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    map: {
-        // Add the styles for the map component
-    },
-});
-
-export default function ClockinScreen() {
-    const [location, setLocation] = useState(null);
-    const [message, setMessage] = useState('');
-    const [withinRange, setWithinRange] = useState(false);
+    const distance = (lat1, lon1, lat2, lon2) => {
+        if ((lat1 === lat2) && (lon1 === lon2)) {
+            return 0;
+        } else {
+            let radlat1 = Math.PI * lat1 / 180;
+            let radlat2 = Math.PI * lat2 / 180;
+            let theta = lon1 - lon2;
+            let radtheta = Math.PI * theta / 180;
+            let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+            if (dist > 1) {
+                dist = 1;
+            }
+            dist = Math.acos(dist);
+            dist = dist * 180 / Math.PI;
+            dist = dist * 60 * 1.1515;
+            // Get in meters
+            dist = dist * 1609.344;
+            return dist;
+        }
+    };
 
     useEffect(() => {
-        getLocation();
+        (async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                alert('Permission to access location was denied');
+                return;
+            }
+
+            let location = await Location.getCurrentPositionAsync({});
+            const { latitude, longitude } = location.coords;
+            setPosition({
+                latitude,
+                longitude,
+            });
+            const dist = distance(latitude, longitude, workLocation.latitude, workLocation.longitude);
+            setIsWithinRange(dist <= 100); // Check if the user is within 100 meters of the work location
+        })();
     }, []);
 
-    const getLocation = async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-            return;
-        }
-
-        let currentLocation = await Location.getCurrentPositionAsync({});
-        setLocation(currentLocation);
-    };
-
-    const handleCheckLocation = () => {
-        getLocation();
-    };
-
-    const handleClockin = async () => {
-        try {
-            // Check if user's current location is available
-            if (location) {
-                const correctLocation = { latitude: 41.431469, longitude: 2.2218431 }; // Replace with correct location coordinates
-                const distance = haversineDistance(
-                    location.coords.latitude,
-                    location.coords.longitude,
-                    correctLocation.latitude,
-                    correctLocation.longitude
-                );
-
-                if (distance < 10000) {
-                    // Prompt user for biometric authentication
-                    Biometrics.simplePrompt({ promptMessage: 'Confirm fingerprint' })
-                        .then((resultObject) => {
-                            const { success } = resultObject;
-
-                            if (success) {
-                                console.log('Successful biometrics provided');
-                                // Perform the check-in logic here
-                            } else {
-                                console.log('User cancelled biometric prompt');
-                            }
-                        })
-                        .catch(() => {
-                            console.log('Biometrics failed');
-                        });
-                } else {
-                    // User is not within the correct range
-                    setMessage("You are not at the correct location to check in.");
-                    setWithinRange(false);
-                }
-            }
-        } catch (error) {
-            console.log(error);
-            setMessage("An error occurred while trying to check in.");
+    const handleClockIn = () => {
+        if (isWithinRange) {
+            console.log('Clock in user');
+            // Clock in user
+        } else {
+            alert('You are not within range to clock in.');
         }
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Clock In</Text>
-            <Text style={styles.message}>{message}</Text>
-            <TouchableOpacity style={styles.button} onPress={handleCheckLocation}>
-                <Text style={styles.buttonText}>Check Again</Text>
-            </TouchableOpacity>
-            {location && (
-                <Image
+            {position && (
+                <MapView
                     style={styles.map}
-                // Add the code to display the map with the current location
-                />
+                    region={{
+                        latitude: position.latitude,
+                        longitude: position.longitude,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                    }}
+                >
+                    <Marker
+                        coordinate={{
+                            latitude: position.latitude,
+                            longitude: position.longitude,
+                        }}
+                        title="Your location"
+                    />
+                </MapView>
             )}
+            <Text>Latitude: {position?.latitude}</Text>
+            <Text>Longitude: {position?.longitude}</Text>
+            <Button onPress={handleClockIn} title="Clock In" />
         </View>
     );
-}
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    map: {
+        width: '100%',
+        height: '50%',
+    },
+});
+
+export default ClockInScreen;
