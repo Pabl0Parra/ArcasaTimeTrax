@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { auth, db } from '../services/Firebase';
 
 const ClockInScreen = () => {
     const [position, setPosition] = useState(null);
@@ -52,10 +53,20 @@ const ClockInScreen = () => {
         })();
     }, []);
 
-    const handleClockIn = () => {
+    const handleClockIn = async () => {
         if (isWithinRange) {
-            console.log('Clock in user');
             // Clock in user
+            try {
+                const uid = auth.currentUser.uid;
+                const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+                await db.collection('users').doc(uid).collection('timestamps').add({
+                    clockIn: timestamp,
+                    clockOut: null,
+                });
+                alert('Clocked in at ' + timestamp);
+            } catch (error) {
+                alert('Error clocking in: ' + error);
+            }
         } else {
             alert('You are not within range to clock in.');
         }
