@@ -48,7 +48,7 @@ const ClockInScreen = () => {
                 longitude,
             });
             const dist = distance(latitude, longitude, workLocation.latitude, workLocation.longitude);
-            setIsWithinRange(dist <= 100); // Check if the user is within 100 meters of the work location
+            setIsWithinRange(dist <= 20); // Check if the user is within 20 meters of the work location
         })();
     }, []);
 
