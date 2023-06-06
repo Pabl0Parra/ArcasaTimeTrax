@@ -4,7 +4,7 @@ import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image, Alert, I
 import loginBg from '../assets/loginBg.jpg';
 
 
-export default function Login({ navigation }) {
+export default function BioLogin({ navigation }) {
 
     const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
 
