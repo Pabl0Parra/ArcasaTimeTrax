@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet, Text, View, Image, Button } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 const ClockInScreen = () => {
     const [position, setPosition] = useState(null);
     const [isWithinRange, setIsWithinRange] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const workLocation = {
         latitude: 41.4314327,
@@ -41,16 +43,23 @@ const ClockInScreen = () => {
                 return;
             }
 
-            let location = await Location.getCurrentPositionAsync({});
-            const { latitude, longitude } = location.coords;
-            setPosition({
-                latitude,
-                longitude,
-            });
-            const dist = distance(latitude, longitude, workLocation.latitude, workLocation.longitude);
-            setIsWithinRange(dist <= 20); // Check if the user is within 20 meters of the work location
+            try {
+                setIsLoading(true); // Show the loading spinner
+
+                let location = await Location.getCurrentPositionAsync({});
+                const { latitude, longitude } = location.coords;
+                setPosition({
+                    latitude,
+                    longitude,
+                });
+                const dist = distance(latitude, longitude, workLocation.latitude, workLocation.longitude);
+                setIsWithinRange(dist <= 20); // Check if the user is within 20 meters of the work location
+            } finally {
+                setIsLoading(false); // Hide the loading spinner
+            }
         })();
     }, []);
+
 
     const handleClockIn = () => {
         if (isWithinRange) {
@@ -63,30 +72,38 @@ const ClockInScreen = () => {
 
     return (
         <View style={styles.container}>
-            {position && (
-                <MapView
-                    style={styles.map}
-                    region={{
-                        latitude: position.latitude,
-                        longitude: position.longitude,
-                        latitudeDelta: 0.0922,
-                        longitudeDelta: 0.0421,
-                    }}
-                >
-                    <Marker
-                        coordinate={{
-                            latitude: position.latitude,
-                            longitude: position.longitude,
-                        }}
-                        title="Your location"
-                    />
-                </MapView>
+            {isLoading ? ( // Show the spinner if isLoading is true
+                <Spinner visible={true} />
+            ) : (
+                <>
+                    <Image source={require('../assets/logo.jpg')} style={styles.logo} />
+                    {position && (
+                        <MapView
+                            style={styles.map}
+                            region={{
+                                latitude: position.latitude,
+                                longitude: position.longitude,
+                                latitudeDelta: 0.0922,
+                                longitudeDelta: 0.0421,
+                            }}
+                        >
+                            <Marker
+                                coordinate={{
+                                    latitude: position.latitude,
+                                    longitude: position.longitude,
+                                }}
+                                title="Your location"
+                            />
+                        </MapView>
+                    )}
+
+                    <Button onPress={handleClockIn} title="Clock In" style={styles.button} /><Text>Latitude: {position?.latitude}</Text>
+                    <Text>Longitude: {position?.longitude}</Text>
+                </>
             )}
-            <Text>Latitude: {position?.latitude}</Text>
-            <Text>Longitude: {position?.longitude}</Text>
-            <Button onPress={handleClockIn} title="Clock In" />
         </View>
     );
+
 };
 
 const styles = StyleSheet.create({
@@ -94,10 +111,20 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+
+    },
+    logo: {
+        width: 305,
+        height: 120,
+        marginBottom: 20,
     },
     map: {
         width: '100%',
         height: '50%',
+    },
+    button: {
+        marginTop: 20,
+        backgroundColor: 'orange',
     },
 });
 
