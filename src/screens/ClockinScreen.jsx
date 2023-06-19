@@ -59,7 +59,7 @@ const ClockInScreen = () => {
         })();
     }, []);
 
-    const handleClockIn = () => {
+    const handleClockIn = async () => {
         if (isWithinRange) {
             // Clock in user
             try {
