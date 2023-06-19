@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, Button } from 'react-native';
+import { StyleSheet, Text, View, Image, Button, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -96,9 +96,9 @@ const ClockInScreen = () => {
                             />
                         </MapView>
                     )}
-
-                    <Button onPress={handleClockIn} title="Clock In" style={styles.button} /><Text>Latitude: {position?.latitude}</Text>
-                    <Text>Longitude: {position?.longitude}</Text>
+                    <TouchableOpacity onPress={handleClockIn} style={styles.button}><Text>Clock In</Text></TouchableOpacity>
+                    <Text style={styles.text}>Latitude: {position?.latitude}</Text>
+                    <Text style={styles.textEnd}>Longitude: {position?.longitude}</Text>
                 </>
             )}
         </View>
@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
 
     },
     logo: {
+        marginTop: 20,
         width: 305,
         height: 120,
         marginBottom: 20,
@@ -123,9 +124,21 @@ const styles = StyleSheet.create({
         height: '50%',
     },
     button: {
-        marginTop: 20,
+        marginTop: 30,
+        marginBottom: 20,
+        padding: 14,
+        borderRadius: 4,
         backgroundColor: 'orange',
     },
+    text: {
+        fontSize: 14,
+        marginBottom: 5,
+    },
+    textEnd: {
+        fontSize: 14,
+        marginBottom: 20,
+    },
+
 });
 
 export default ClockInScreen;
